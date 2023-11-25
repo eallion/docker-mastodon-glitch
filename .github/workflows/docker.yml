@@ -1,0 +1,42 @@
+name: Sync Mastodon Glitch Edition Docker Image
+
+on:
+  # push:
+  #   branches:
+  #     - 'main'
+
+#  watch:
+#    types: [started]
+
+  schedule:
+    # Everyday
+    - cron:  '0 13 * * *'
+
+  workflow_dispatch:
+
+env:
+  TZ: "Asia/Shanghai"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Pull Mastodon Glitch Retag
+      run: |
+        RECENT_TAG=nightly.`date '+%Y-%m-%d'`
+
+        docker pull ghcr.io/glitch-soc/mastodon:${RECENT_TAG}
+
+        docker tag ghcr.io/glitch-soc/mastodon:${RECENT_TAG} eallion/mastodon-glitch:latest
+        docker tag ghcr.io/glitch-soc/mastodon:${RECENT_TAG} eallion/mastodon-glitch:${RECENT_TAG}
+
+        docker push eallion/mastodon-glitch:latest
+        docker push eallion/mastodon-glitch:${RECENT_TAG}
